@@ -68,14 +68,17 @@
                             </button>
                         </div>
                         <div class="city-tabs">
-                            <button :class="{active: isacitve0}" @click="getCrtyData(0)">{{ t.cities.sh }}</button>
-                            <button :class="{active: isacitve1}" @click="getCrtyData(1)">{{ t.cities.bj }}</button>
-                            <button :class="{active: isacitve2}" @click="getCrtyData(2)">{{ t.cities.sz }}</button>
-                            <button :class="{active: isacitve3}" @click="getCrtyData(3)">{{ t.cities.gz }}</button>
-                            <button :class="{active: isacitve4}" @click="getCrtyData(4)">{{ t.cities.ga }}</button>
+                            <select class="city-select" :value="selectedMoreCity" :aria-label="t.cityCol" :disabled="!moreHistory.length" @change="selectCity($event.target.value)">
+                                <option value="" disabled>{{ t.cityCol }}</option>
+                                <option v-for="(name, key) in t.citiesRank" :key="key" :value="key">{{ name }}</option>
+                            </select>
+                            <button :class="{active: selectedCity === 'sh'}" @click="selectCity('sh')">{{ t.cities.sh }}</button>
+                            <button :class="{active: selectedCity === 'bj'}" @click="selectCity('bj')">{{ t.cities.bj }}</button>
+                            <button :class="{active: selectedCity === 'sz'}" @click="selectCity('sz')">{{ t.cities.sz }}</button>
+                            <button :class="{active: selectedCity === 'gz'}" @click="selectCity('gz')">{{ t.cities.gz }}</button>
                         </div>
                     </div>
-                    <div class="year-tabs" v-if="availableYears.length > 1">
+                    <div class="year-tabs" v-if="availableYears.length > 0">
                         <button :class="{active: selectedYear === 'all'}" @click="setYear('all')">{{ t.all }}</button>
                         <button v-for="y in availableYears" :key="y" :class="{active: selectedYear === y}" @click="setYear(y)">{{y}}</button>
                     </div>
@@ -110,32 +113,6 @@
                             <span class="framework-tag vue">Vue</span>
                             <span class="card-value dim">--</span>
                         </div>
-                    </div>
-
-                    <!-- 全国 -->
-                    <div class="stat-card glass-card">
-                        <div class="card-corner tl"></div>
-                        <div class="card-corner tr"></div>
-                        <div class="card-corner bl"></div>
-                        <div class="card-corner br"></div>
-                        <div class="card-label">{{ t.cities.ga }}</div>
-                        <div class="card-divider"></div>
-                        <div class="card-row">
-                            <span class="framework-tag react">R</span>
-                            <span class="card-value react-val">
-                                <NumberGrow v-if="data" :value="strs((JSON.parse(data[(data.length-1)].react)['ga']).toString())"></NumberGrow><span v-if="data && strs((JSON.parse(data[(data.length-1)].react)['ga']).toString()) >= 1000" class="plus-sign">+</span>
-                                <span v-if="!data" class="mini-spinner"></span>
-                            </span>
-                        </div>
-                        <div class="card-yesterday">{{ t.yesterday }}: <span v-if="data">{{JSON.parse(data[(data.length-2)].react)['ga']}}</span><span v-else class="mini-spinner"></span></div>
-                        <div class="card-row">
-                            <span class="framework-tag vue">V</span>
-                            <span class="card-value vue-val">
-                                <NumberGrow v-if="data" :value="strs((JSON.parse(data[(data.length-1)].vue)['ga']).toString())"></NumberGrow><span v-if="data && strs((JSON.parse(data[(data.length-1)].vue)['ga']).toString()) >= 1000" class="plus-sign">+</span>
-                                <span v-if="!data" class="mini-spinner"></span>
-                            </span>
-                        </div>
-                        <div class="card-yesterday">{{ t.yesterday }}: <span v-if="data">{{JSON.parse(data[(data.length-2)].vue)['ga']}}</span><span v-else class="mini-spinner"></span></div>
                     </div>
 
                     <!-- 上海 -->
@@ -392,12 +369,12 @@
             title: '前端框架招聘热度',
             subtitle: '数据来源: 各大主流招聘平台',
             trendTitle: '职位趋势',
-            cities: { sh: '上海', bj: '北京', sz: '深圳', gz: '广州', ga: '全国' },
+            cities: { sh: '上海', bj: '北京', sz: '深圳', gz: '广州' },
             all: '全部',
             loading: '数据加载中...',
             dataUpdateHint: '数据每天凌晨更新',
             yesterday: '昨天',
-            rankTitle: '全国城市职位排行',
+            rankTitle: '城市职位排行',
             cityCol: '城市',
             jobCount: '职位数',
             reactTrend: 'react趋势',
@@ -421,7 +398,7 @@
             title: 'Frontend Framework Job Trends',
             subtitle: 'Data source: Major recruitment platforms',
             trendTitle: 'Job Trends',
-            cities: { sh: 'Shanghai', bj: 'Beijing', sz: 'Shenzhen', gz: 'Guangzhou', ga: 'National' },
+            cities: { sh: 'Shanghai', bj: 'Beijing', sz: 'Shenzhen', gz: 'Guangzhou' },
             all: 'All',
             loading: 'Loading data...',
             dataUpdateHint: 'Data updates daily at midnight',
@@ -450,7 +427,7 @@
             title: 'Tendances emplois frontend',
             subtitle: 'Source: Principales plateformes de recrutement',
             trendTitle: 'Tendances des postes',
-            cities: { sh: 'Shanghai', bj: 'Pékin', sz: 'Shenzhen', gz: 'Guangzhou', ga: 'National' },
+            cities: { sh: 'Shanghai', bj: 'Pékin', sz: 'Shenzhen', gz: 'Guangzhou' },
             all: 'Tout',
             loading: 'Chargement...',
             dataUpdateHint: 'Données mises à jour chaque nuit',
@@ -479,7 +456,7 @@
             title: '프론트엔드 프레임워크 채용 동향',
             subtitle: '데이터 출처: 주요 채용 플랫폼',
             trendTitle: '채용 동향',
-            cities: { sh: '상하이', bj: '베이징', sz: '선전', gz: '광저우', ga: '전국' },
+            cities: { sh: '상하이', bj: '베이징', sz: '선전', gz: '광저우' },
             all: '전체',
             loading: '데이터 로딩 중...',
             dataUpdateHint: '데이터는 매일 자정에 업데이트됩니다',
@@ -508,7 +485,7 @@
             title: 'Frontend Framework Vacaturetrends',
             subtitle: 'Gegevensbron: Grote wervingsplatforms',
             trendTitle: 'Vacaturetrends',
-            cities: { sh: 'Shanghai', bj: 'Peking', sz: 'Shenzhen', gz: 'Guangzhou', ga: 'Nationaal' },
+            cities: { sh: 'Shanghai', bj: 'Peking', sz: 'Shenzhen', gz: 'Guangzhou' },
             all: 'Alles',
             loading: 'Laden...',
             dataUpdateHint: 'Gegevens worden elke nacht bijgewerkt',
@@ -537,7 +514,7 @@
             title: 'Frontend-rammeverk jobbtrender',
             subtitle: 'Datakilde: Store rekrutteringsplattformer',
             trendTitle: 'Jobbtrender',
-            cities: { sh: 'Shanghai', bj: 'Beijing', sz: 'Shenzhen', gz: 'Guangzhou', ga: 'Nasjonalt' },
+            cities: { sh: 'Shanghai', bj: 'Beijing', sz: 'Shenzhen', gz: 'Guangzhou' },
             all: 'Alle',
             loading: 'Laster...',
             dataUpdateHint: 'Data oppdateres hver natt',
@@ -594,36 +571,25 @@
                 sz_react_data:[],
                 gz_vue_data:[],
                 gz_react_data:[],
-                ga_vue_data:[],
-                ga_react_data:[],
-                nationalDataVue:[],
-                nationalDataReact:[],
-                ga_old:'',
                 sh_old:'',
                 bj_old:'',
                 sz_old:'',
                 gz_old:'',
-                ga_oldval:'',
                 sh_oldval:'',
                 bj_oldval:'',
                 sz_oldval:'',
                 gz_oldval:'',
-                ga_old_v:'',
                 sh_old_v:'',
                 bj_old_v:'',
                 sz_old_v:'',
                 gz_old_v:'',
-                ga_oldval_v:'',
                 data_rs_more:'',
+                moreHistory: [],
+                selectedCity: 'bj',
                 sh_oldval_v:'',
                 bj_oldval_v:'',
                 sz_oldval_v:'',
                 gz_oldval_v:'',
-                isacitve0:false,
-                isacitve1:true,
-                isacitve2:false,
-                isacitve3:false,
-                isacitve4:false,
                 rotate: 90,
                 align: 'left',
                 verticalAlign: 'middle',
@@ -650,6 +616,9 @@
         computed:{
             t() {
                 return LANGS[this.currentLang]
+            },
+            selectedMoreCity() {
+                return Object.prototype.hasOwnProperty.call(this.t.citiesRank, this.selectedCity) ? this.selectedCity : '';
             },
             availableYears() {
                 const years = [...new Set(this.timeDtae.map(d => d ? d.substring(0, 4) : ''))].filter(Boolean);
@@ -722,11 +691,6 @@
                     this.drawPie('main')
                 })
             },
-            ga_old: {
-                handler: function (val, oldval) {
-                    this.ga_oldval = oldval ? oldval : '--'
-                },
-            },
             sh_old: {
                 handler: function (val, oldval) {
                     this.sh_oldval = oldval ? oldval : '--'
@@ -745,11 +709,6 @@
             gz_old: {
                 handler: function (val, oldval) {
                     this.gz_oldval = oldval ? oldval : '--'
-                },
-            },
-            ga_old_v: {
-                handler: function (val, oldval) {
-                    this.ga_oldval_v = oldval ? oldval : '--'
                 },
             },
             sh_old_v: {
@@ -863,7 +822,7 @@
                                 let result = params[0].axisValueLabel + '<br/>';
                                 params.forEach(item => {
                                     if (item.seriesName === reactTrendName || item.seriesName === vueTrendName) return;
-                                    const val = (this.isacitve4 && item.value === 1000) ? item.value + '+' : item.value;
+                                    const val = item.value;
                                     result += item.marker + item.seriesName + ': ' + val + '<br/>';
                                 });
                                 return result;
@@ -934,7 +893,8 @@
                                 nameTextStyle: {
                                     color: 'rgba(255,255,255,0.6)'
                                 },
-                                min: 100,
+                                min: 0,
+                                minInterval: 1,
                                 axisLabel: {
                                     formatter: isSmall ? '{value}' : ('{value}'),
                                     show: true,
@@ -1005,7 +965,7 @@
                                         label: {
                                             show: showLabel,
                                             position: 'top',
-                                            formatter: (params) => (this.isacitve4 && params.value === 1000) ? params.value + '+' : params.value,
+                                            formatter: (params) => params.value,
                                             textStyle: {
                                                 color: '#ff6b7a',
                                                 fontSize: labelFontSize
@@ -1041,7 +1001,7 @@
                                         label: {
                                             show: showLabel,
                                             position: 'top',
-                                            formatter: (params) => (this.isacitve4 && params.value === 1000) ? params.value + '+' : params.value,
+                                            formatter: (params) => params.value,
                                             textStyle: {
                                                 color: '#ffd32a',
                                                 fontSize: labelFontSize
@@ -1099,142 +1059,37 @@
                 });
             },
             getlistDates_more(){
-                return this.$get(P_GET_DATALIST_MORE).then(res => {
-                    if(res.code==200){
-                        this.data_rs_more=res.data[0];
-                    }
-                }).catch(() => {
-                    return Promise.reject();
+                return this.$get(P_GET_DATALIST_MORE, { history: 1 }).then(res => {
+                    if (res.code != 200 || !Array.isArray(res.data)) throw new Error('Invalid city history');
+                    this.moreHistory = res.data.slice().sort((a, b) => a.ceate_time.localeCompare(b.ceate_time));
+                    this.data_rs_more = this.moreHistory[this.moreHistory.length - 1] || '';
+                    this.selectCity(this.selectedCity);
                 });
             },
             getListDates(){
                 return this.$get(P_GET_DATALIST).then(res => {
-                    if(res.code==200){
-                       let datas = res.data ? res.data :'';
-                       this.data=datas;
-
-                        if(datas){
-                            let day_date = [];
-
-                            let sh_vue_data = [];
-                            let sh_react_data = [];
-
-                            let bj_vue_data = [];
-                            let bj_react_data = [];
-
-                            let sz_vue_data = [];
-                            let sz_react_data = [];
-
-                            let gz_vue_data = [];
-                            let gz_react_data = [];
-
-                            let ga_vue_data = [];
-                            let ga_react_data = [];
-
-                            for(let i=0;i<datas.length;i++){
-                                day_date.push(datas[i].ceate_time)
-
-                                sh_vue_data.push(JSON.parse(datas[i].vue).sh)
-                                sh_react_data.push(JSON.parse(datas[i].react).sh)
-
-                                bj_vue_data.push(JSON.parse(datas[i].vue).bj)
-                                bj_react_data.push(JSON.parse(datas[i].react).bj)
-
-                                sz_vue_data.push(JSON.parse(datas[i].vue).sz)
-                                sz_react_data.push(JSON.parse(datas[i].react).sz)
-
-                                gz_vue_data.push(JSON.parse(datas[i].vue).gz)
-                                gz_react_data.push(JSON.parse(datas[i].react).gz)
-
-                                ga_vue_data.push(JSON.parse(datas[i].vue).ga)
-                                ga_react_data.push(JSON.parse(datas[i].react).ga)
-                            }
-
-                            this.timeDtae = day_date;
-                            this.vueData = bj_vue_data;
-                            this.nationalDataVue=ga_vue_data
-                            this.nationalDataReact=ga_react_data
-                            this.reactData = bj_react_data;
-
-                            this.sh_vue_data= sh_vue_data;
-                            this.sh_react_data=sh_react_data;
-
-                            this.bj_vue_data= bj_vue_data;
-                            this.bj_react_data=bj_react_data;
-
-                            this.sz_vue_data= sz_vue_data;
-                            this.sz_react_data=sz_react_data;
-
-                            this.gz_vue_data= gz_vue_data;
-                            this.gz_react_data=gz_react_data;
-                        }
-                    }
-                }).catch(() => {
-                    return Promise.reject();
+                    if (res.code != 200 || !Array.isArray(res.data)) throw new Error('Invalid city history');
+                    this.data = res.data.length ? res.data : '';
+                    this.selectCity(this.selectedCity);
                 });
             },
-             getCrtyData(id){
-                    if(id==0){
-                        this.isacitve0=true;
-                        this.isacitve1=false;
-                        this.isacitve2=false;
-                        this.isacitve3=false;
-                        this.isacitve4=false;
-                        this.vueData = this.sh_vue_data;
-                        this.reactData = this.sh_react_data;
-                        this.$nextTick(function() {
-                            this.drawPie('main')
-                        })
-                    }
-                    if(id==1){
-                        this.isacitve0=false;
-                        this.isacitve1=true;
-                        this.isacitve2=false;
-                        this.isacitve3=false;
-                        this.isacitve4=false;
-                        this.vueData = this.bj_vue_data;
-                        this.reactData = this.bj_react_data;
-                        this.$nextTick(function() {
-                            this.drawPie('main')
-                        })
-                    }
-                     if(id==2){
-                         this.isacitve0=false;
-                         this.isacitve1=false;
-                         this.isacitve2=true;
-                         this.isacitve3=false;
-                         this.isacitve4=false;
-                         this.vueData = this.sz_vue_data;
-                         this.reactData = this.sz_react_data;
-                         this.$nextTick(function() {
-                             this.drawPie('main')
-                         })
-                     }
-                     if(id==3){
-                         this.isacitve0=false;
-                         this.isacitve1=false;
-                         this.isacitve2=false;
-                         this.isacitve3=true;
-                         this.isacitve4=false;
-                         this.vueData = this.gz_vue_data;
-                         this.reactData = this.gz_react_data;
-                         this.$nextTick(function() {
-                             this.drawPie('main')
-                         })
-                     }
-                 if(id==4){
-                     this.isacitve0=false;
-                     this.isacitve1=false;
-                     this.isacitve2=false;
-                     this.isacitve3=false;
-                     this.isacitve4=true;
-                     this.vueData = this.nationalDataVue;
-                     this.reactData = this.nationalDataReact;
-                     this.$nextTick(function() {
-                         this.drawPie('main')
-                     })
-                 }
-             },
+            selectCity(city){
+                if (!Object.prototype.hasOwnProperty.call(this.t.cities, city) &&
+                    !Object.prototype.hasOwnProperty.call(this.t.citiesRank, city)) return;
+                this.selectedCity = city;
+                const rows = (this.selectedMoreCity ? this.moreHistory : this.data) || [];
+                const value = (row, framework) => {
+                    const values = typeof row[framework] === 'string' ? JSON.parse(row[framework]) : row[framework];
+                    const raw = values && values[city];
+                    if (raw === undefined || raw === null || raw === '') return null;
+                    const number = Number(String(raw).replace(/,/g, '').replace(/\+$/, ''));
+                    return Number.isFinite(number) ? number : null;
+                };
+                this.timeDtae = rows.map(row => row.ceate_time);
+                this.vueData = rows.map(row => value(row, 'vue'));
+                this.reactData = rows.map(row => value(row, 'react'));
+                if (this.selectedYear !== 'all' && !this.availableYears.includes(this.selectedYear)) this.selectedYear = 'all';
+            },
 
                 getCode() {
                     if (!this.timer) {
@@ -1264,11 +1119,11 @@
                 return numArr ?  +numArr.join('') : '0'
             },
             linearRegression(data) {
-                const n = data.length;
-                if (n < 2) return [];
-                const start = Number(data[0]) || 0;
-                const end = Number(data[n - 1]) || 0;
-                return Array.from({ length: n }, (_, i) => Math.round(start + (end - start) * i / (n - 1)));
+                const valid = data.map((value, i) => ({ value, i })).filter(point => point.value !== null && Number.isFinite(Number(point.value)));
+                if (valid.length < 2) return [];
+                const first = valid[0];
+                const last = valid[valid.length - 1];
+                return data.map((_, i) => i < first.i || i > last.i ? null : Math.round(Number(first.value) + (Number(last.value) - Number(first.value)) * (i - first.i) / (last.i - first.i)));
             },
             setYear(year) {
                 this.selectedYear = year;
@@ -1643,6 +1498,8 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
     padding: 14px 20px;
     border-bottom: 1px solid rgba(0, 255, 242, 0.08);
 }
@@ -1768,6 +1625,21 @@
     display: flex;
     gap: 4px;
 }
+.city-select {
+    max-width: 150px;
+    min-height: 30px;
+    flex-shrink: 0;
+    padding: 5px 10px;
+    color: #00fff2;
+    background: #0a142e;
+    border: 1px solid rgba(0, 255, 242, 0.4);
+    border-radius: 4px;
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+}
+.city-select:disabled { opacity: 0.5; cursor: wait; }
+.city-select:focus-visible { outline: 2px solid #00fff2; outline-offset: 2px; }
 .city-tabs button {
     padding: 5px 16px;
     font-size: 13px;
